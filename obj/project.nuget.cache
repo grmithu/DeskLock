@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "1vwPQld38lU=",
+  "success": true,
+  "projectFilePath": "E:\\Projects\\DeskLock\\AwayLock.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Mithu\\.nuget\\packages\\communitytoolkit.mvvm\\8.4.0\\communitytoolkit.mvvm.8.4.0.nupkg.sha512"
+  ],
+  "logs": []
+}

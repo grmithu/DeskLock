@@ -85,6 +85,90 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="StatusCardButton" TargetType="Button">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Background" Value="{Binding CardBackground}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Margin" Value="3" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="Bd"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="Transparent"
+                                    BorderThickness="1"
+                                    CornerRadius="12" />
+                            <Grid Margin="8,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="32" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="24" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding IconGlyph}"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="24"
+                                           Foreground="{Binding Brush}"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Left" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,2,0">
+                                    <TextBlock Text="{Binding Name}"
+                                               FontSize="14"
+                                               FontWeight="Bold"
+                                               Foreground="#FF17202A"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Description}"
+                                               FontSize="12"
+                                               Foreground="#FF344054"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <Grid x:Name="SelectionIndicator"
+                                      Grid.Column="2"
+                                      Width="22"
+                                      Height="22"
+                                      HorizontalAlignment="Right"
+                                      VerticalAlignment="Center"
+                                      Visibility="Collapsed">
+                                    <Ellipse Fill="#FF0078D7" />
+                                    <TextBlock Text="&#xE73E;"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="13"
+                                               Foreground="White"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+                            </Grid>
+                            <Border x:Name="KeyboardFocusRing"
+                                    BorderBrush="Transparent"
+                                    BorderThickness="2"
+                                    CornerRadius="10"
+                                    IsHitTestVisible="False" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="KeyboardFocusRing" Property="BorderBrush" Value="#FF005A9E" />
+                            </Trigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True" />
+                                    <Condition Binding="{Binding IsSelected}" Value="False" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.86" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#660078D7" />
+                            </MultiDataTrigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FF0078D7" />
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
+                                <Setter TargetName="SelectionIndicator" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="SectionLabel" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Margin" Value="0,14,0,6" />
@@ -196,9 +280,8 @@
             <!-- Header (drag kora jay) -->
             <Border Background="#FF0F2A44" Padding="16,10" MouseLeftButtonDown="Header_MouseLeftButtonDown">
                 <DockPanel>
-                    <TextBlock Text="Desk Lock" Foreground="White" FontWeight="SemiBold" />
-                    <TextBlock Text="Enter = Lock   Esc = Cancel" Foreground="#FFB8C7D9" FontSize="12"
-                               HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    <TextBlock Text="DeskLock" Foreground="White" FontWeight="SemiBold" />
+               
                 </DockPanel>
             </Border>
 
@@ -213,15 +296,12 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Button Style="{StaticResource SelectableButton}"
+                            <Button Style="{StaticResource StatusCardButton}"
                                     Focusable="True"
                                     Command="{Binding DataContext.SelectStatusCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}">
-                                <StackPanel Orientation="Horizontal">
-                                    <Ellipse Width="10" Height="10" Fill="{Binding Brush}" Margin="0,0,8,0" />
-                                    <TextBlock Text="{Binding Name}" />
-                                </StackPanel>
-                            </Button>
+                                    CommandParameter="{Binding}"
+                                    AutomationProperties.Name="{Binding Name}"
+                                    AutomationProperties.HelpText="{Binding Description}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

@@ -21,7 +21,17 @@ public partial class MainViewModel : ObservableObject
         _lockScreen = lockScreen;
 
         Statuses = new ObservableCollection<StatusOption>(
-            AppSettings.Statuses.Select(s => new StatusOption(s.Name, s.R, s.G, s.B, s.Minutes)));
+            AppSettings.Statuses.Select(s => new StatusOption(
+                s.Name,
+                s.R,
+                s.G,
+                s.B,
+                s.Minutes,
+                s.Description,
+                s.IconGlyph,
+                s.BackgroundR,
+                s.BackgroundG,
+                s.BackgroundB)));
         TimeOptions = new ObservableCollection<TimeOption>(
             AppSettings.TimeOptions.Select(t => new TimeOption(t.Label, t.Minutes)));
 

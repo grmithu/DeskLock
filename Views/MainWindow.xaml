@@ -11,7 +11,8 @@
         Topmost="True"
         Background="#FFF7F7F7"
         FontFamily="Segoe UI"
-        FontSize="14">
+        FontSize="14"
+        PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.InputBindings>
         <KeyBinding Key="Return" Command="{Binding LockCommand}" />
@@ -204,7 +205,7 @@
             <StackPanel Margin="16,0,16,16">
 
                 <TextBlock Text="Status" Style="{StaticResource SectionLabel}" />
-                <ItemsControl ItemsSource="{Binding Statuses}" Focusable="False">
+                <ItemsControl x:Name="StatusOptions" ItemsSource="{Binding Statuses}" Focusable="False">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Columns="2" />
@@ -213,6 +214,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Button Style="{StaticResource SelectableButton}"
+                                    Focusable="True"
                                     Command="{Binding DataContext.SelectStatusCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                     CommandParameter="{Binding}">
                                 <StackPanel Orientation="Horizontal">
@@ -229,7 +231,7 @@
                          Padding="6,5" BorderBrush="#FFBBBBBB" />
 
                 <TextBlock Text="Expected Return" Style="{StaticResource SectionLabel}" />
-                <ItemsControl ItemsSource="{Binding TimeOptions}" Focusable="False">
+                <ItemsControl x:Name="TimeOptions" ItemsSource="{Binding TimeOptions}" Focusable="False">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Columns="5" />
@@ -240,6 +242,7 @@
                             <Button Style="{StaticResource SelectableButton}"
                                     Content="{Binding Label}"
                                     FontSize="13"
+                                    Focusable="True"
                                     Command="{Binding DataContext.SelectTimeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                     CommandParameter="{Binding}" />
                         </DataTemplate>

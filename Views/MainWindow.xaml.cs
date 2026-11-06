@@ -1,7 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using DeskLock.ViewModels;
 
 namespace DeskLock.Views;
@@ -45,6 +49,141 @@ public partial class MainWindow : Window
         {
             DragMove();
         }
+    }
+
+    private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key is not (Key.Left or Key.Right or Key.Up or Key.Down))
+        {
+            return;
+        }
+
+        if (!TryGetGridNavigationTarget(out var targetButtons, out var columns, out var currentIndex))
+        {
+            return;
+        }
+
+        var currentRow = currentIndex / columns;
+        var currentColumn = currentIndex % columns;
+        var targetRow = currentRow;
+        var targetColumn = currentColumn;
+
+        switch (e.Key)
+        {
+            case Key.Left:
+                targetColumn--;
+                break;
+            case Key.Right:
+                targetColumn++;
+                break;
+            case Key.Up:
+                targetRow--;
+                break;
+            case Key.Down:
+                targetRow++;
+                break;
+        }
+
+        var totalRows = (int)Math.Ceiling(targetButtons.Count / (double)columns);
+        if (targetButtons.Count == 0)
+        {
+            return;
+        }
+
+        if (targetColumn < 0)
+        {
+            targetColumn = columns - 1;
+        }
+        else if (targetColumn >= columns)
+        {
+            targetColumn = 0;
+        }
+
+        if (targetRow < 0)
+        {
+            targetRow = totalRows - 1;
+        }
+        else if (targetRow >= totalRows)
+        {
+            targetRow = 0;
+        }
+
+        var targetIndex = targetRow * columns + targetColumn;
+        if (targetIndex >= targetButtons.Count)
+        {
+            targetIndex = targetButtons.Count - 1;
+        }
+
+        var targetButton = targetButtons[targetIndex];
+        targetButton.Focus();
+        if (targetButton.Command is not null && targetButton.Command.CanExecute(targetButton.CommandParameter))
+        {
+            targetButton.Command.Execute(targetButton.CommandParameter);
+        }
+
+        e.Handled = true;
+    }
+
+    private bool TryGetGridNavigationTarget(out List<Button> targetButtons, out int columns, out int currentIndex)
+    {
+        targetButtons = new List<Button>();
+        columns = 0;
+        currentIndex = -1;
+
+        var focusedButton = Keyboard.FocusedElement as Button;
+        if (focusedButton is null)
+        {
+            return false;
+        }
+
+        if (StatusOptions is not null && StatusOptions.Items.Contains(focusedButton.DataContext))
+        {
+            targetButtons = FindGridButtons(StatusOptions);
+            columns = 2;
+        }
+        else if (TimeOptions is not null && TimeOptions.Items.Contains(focusedButton.DataContext))
+        {
+            targetButtons = FindGridButtons(TimeOptions);
+            columns = 5;
+        }
+        else
+        {
+            return false;
+        }
+
+        currentIndex = targetButtons.IndexOf(focusedButton);
+        return currentIndex >= 0;
+    }
+
+    private static List<Button> FindGridButtons(ItemsControl itemsControl)
+    {
+        var buttons = new List<Button>();
+        if (itemsControl is null)
+        {
+            return buttons;
+        }
+
+        var queue = new Queue<DependencyObject>();
+        queue.Enqueue(itemsControl);
+
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            var childCount = VisualTreeHelper.GetChildrenCount(current);
+            for (var i = 0; i < childCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(current, i);
+                if (child is Button button)
+                {
+                    buttons.Add(button);
+                }
+                queue.Enqueue(child);
+            }
+        }
+
+        return buttons
+            .Where(button => button.Parent is not null)
+            .ToList();
     }
 
     private void ExactTimeDial_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

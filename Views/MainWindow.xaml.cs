@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using DeskLock.ViewModels;
 
@@ -43,6 +44,16 @@ public partial class MainWindow : Window
         if (e.ButtonState == MouseButtonState.Pressed)
         {
             DragMove();
+        }
+    }
+
+    private void ExactTimeDial_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is Canvas dial && DataContext is MainViewModel viewModel)
+        {
+            var point = e.GetPosition(dial);
+            viewModel.SelectClockDialPoint(point.X, point.Y);
+            e.Handled = true;
         }
     }
 }

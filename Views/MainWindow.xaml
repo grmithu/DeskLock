@@ -1,7 +1,7 @@
 <Window x:Class="DeskLock.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Desk Lock"
+        Title="DeskLock"
         Width="480"
         SizeToContent="Height"
         WindowStartupLocation="CenterScreen"
@@ -42,6 +42,38 @@
             </Setter>
         </Style>
 
+        <Style x:Key="SecondaryActionButton" TargetType="Button">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Background" Value="#FFF1F3F5" />
+            <Setter Property="Foreground" Value="#FF1F2E3D" />
+            <Setter Property="BorderBrush" Value="#FFCBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Height" Value="38" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#FFE7EBEF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#FFDEE5EC" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Select hole nil -->
         <Style x:Key="SelectableButton" TargetType="Button" BasedOn="{StaticResource OptionButton}">
             <Style.Triggers>
@@ -55,6 +87,105 @@
         <Style x:Key="SectionLabel" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Margin" Value="0,14,0,6" />
+        </Style>
+
+        <Style x:Key="ExactTimePickerButton" TargetType="Button">
+            <Setter Property="Padding" Value="6,5" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#FFBBBBBB" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="0">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasExactTimeError}" Value="True">
+                    <Setter Property="BorderBrush" Value="#FFC62828" />
+                    <Setter Property="BorderThickness" Value="1.5" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ClockHourLabel" TargetType="TextBlock">
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Foreground" Value="#FF173A1B" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSelectingMinutes}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ClockMinuteLabel" TargetType="TextBlock" BasedOn="{StaticResource ClockHourLabel}">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSelectingMinutes}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ClockHeaderButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+        </Style>
+
+        <Style x:Key="ClockPeriodButton" TargetType="Button">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#FF173A1B" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="PeriodBorder" Background="{TemplateBinding Background}"
+                                CornerRadius="24">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ClockAmButton" TargetType="Button" BasedOn="{StaticResource ClockPeriodButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ExactTimePeriod}" Value="AM">
+                    <Setter Property="Background" Value="#FF4CAF50" />
+                    <Setter Property="Foreground" Value="White" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ClockPmButton" TargetType="Button" BasedOn="{StaticResource ClockPeriodButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ExactTimePeriod}" Value="PM">
+                    <Setter Property="Background" Value="#FF4CAF50" />
+                    <Setter Property="Foreground" Value="White" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 
@@ -93,11 +224,11 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <TextBlock Text="Or type a custom message" Style="{StaticResource SectionLabel}" />
+                <TextBlock Text="Or write your custom message" Style="{StaticResource SectionLabel}" />
                 <TextBox Text="{Binding CustomMessage, UpdateSourceTrigger=PropertyChanged}"
                          Padding="6,5" BorderBrush="#FFBBBBBB" />
 
-                <TextBlock Text="Back in" Style="{StaticResource SectionLabel}" />
+                <TextBlock Text="Expected Return" Style="{StaticResource SectionLabel}" />
                 <ItemsControl ItemsSource="{Binding TimeOptions}" Focusable="False">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -115,15 +246,136 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <TextBlock Text="Or exact time (e.g. 2:00 PM)" Style="{StaticResource SectionLabel}" />
-                <TextBox Text="{Binding ExactTime, UpdateSourceTrigger=PropertyChanged}"
-                         Padding="6,5" BorderBrush="#FFBBBBBB" />
+                <TextBlock Text="Or select an exact return time" Style="{StaticResource SectionLabel}" />
+                <Grid>
+                    <Button x:Name="ExactTimePickerButton"
+                            Style="{StaticResource ExactTimePickerButton}"
+                            Command="{Binding ToggleExactTimePickerCommand}">
+                        <DockPanel LastChildFill="True">
+                            <Grid DockPanel.Dock="Right" Width="18" Height="18" Margin="8,0,0,0">
+                                <Ellipse Stroke="#FF666666" StrokeThickness="1.5" />
+                                <Line X1="9" Y1="4" X2="9" Y2="9"
+                                      Stroke="#FF666666" StrokeThickness="1.5" />
+                                <Line X1="9" Y1="9" X2="13" Y2="11"
+                                      Stroke="#FF666666" StrokeThickness="1.5" />
+                            </Grid>
+                            <TextBlock Text="{Binding ExactTimeDisplay}"
+                                       VerticalAlignment="Center" Foreground="#FF555555" />
+                        </DockPanel>
+                    </Button>
+                    <Popup PlacementTarget="{Binding ElementName=ExactTimePickerButton}"
+                           Placement="Bottom"
+                           IsOpen="{Binding IsExactTimePickerOpen, Mode=TwoWay}"
+                           DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                           StaysOpen="False"
+                           AllowsTransparency="True">
+                        <Border Width="194" Background="#FFF9FBF9" BorderBrush="#FFBBBBBB"
+                                BorderThickness="1" CornerRadius="4" Margin="0,4,0,0">
+                            <StackPanel>
+                                <Grid Height="70" Background="#FF4CAF50">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                                                VerticalAlignment="Center">
+                                        <Button Content="{Binding ClockHourDisplay}"
+                                                Style="{StaticResource ClockHeaderButton}"
+                                                FontSize="34" Command="{Binding SelectHourPhaseCommand}" />
+                                        <Button Content=":" Style="{StaticResource ClockHeaderButton}"
+                                                FontSize="34" IsHitTestVisible="False" />
+                                        <Button Content="{Binding ClockMinuteDisplay}"
+                                                FontSize="34"
+                                                Command="{Binding SelectMinutePhaseCommand}">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource ClockHeaderButton}">
+                                                    <Setter Property="FontSize" Value="34" />
+                                                    <Setter Property="Foreground" Value="#FFBDE4BF" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelectingMinutes}" Value="True">
+                                                            <Setter Property="Foreground" Value="White" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                        <Button Content="{Binding ClockPeriodDisplay}"
+                                                Style="{StaticResource ClockHeaderButton}"
+                                                FontSize="12" Margin="2,16,0,0"
+                                                Command="{Binding SelectMinutePhaseCommand}" />
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock Text="{Binding ClockPickerInstruction}" FontSize="10"
+                                           Foreground="#FF668068" HorizontalAlignment="Center"
+                                           Margin="0,2,0,0" />
+                                <Canvas x:Name="ExactTimeDial" Width="164" Height="164"
+                                        HorizontalAlignment="Center" Background="Transparent"
+                                        MouseLeftButtonDown="ExactTimeDial_MouseLeftButtonDown">
+                                    <Ellipse Width="150" Height="150" Canvas.Left="7" Canvas.Top="7"
+                                             Fill="#FFEEF5EF" IsHitTestVisible="False" />
+                                    <Line X1="82" Y1="82" X2="{Binding DialHandX}" Y2="{Binding DialHandY}"
+                                          Stroke="#FF4CAF50" StrokeThickness="1.5"
+                                          IsHitTestVisible="False" />
+                                    <TextBlock Text="12" Style="{StaticResource ClockHourLabel}" Canvas.Left="71" Canvas.Top="10" />
+                                    <TextBlock Text="1" Style="{StaticResource ClockHourLabel}" Canvas.Left="101" Canvas.Top="18" />
+                                    <TextBlock Text="2" Style="{StaticResource ClockHourLabel}" Canvas.Left="123" Canvas.Top="40" />
+                                    <TextBlock Text="3" Style="{StaticResource ClockHourLabel}" Canvas.Left="131" Canvas.Top="71" />
+                                    <TextBlock Text="4" Style="{StaticResource ClockHourLabel}" Canvas.Left="123" Canvas.Top="101" />
+                                    <TextBlock Text="5" Style="{StaticResource ClockHourLabel}" Canvas.Left="101" Canvas.Top="123" />
+                                    <TextBlock Text="6" Style="{StaticResource ClockHourLabel}" Canvas.Left="71" Canvas.Top="132" />
+                                    <TextBlock Text="7" Style="{StaticResource ClockHourLabel}" Canvas.Left="40" Canvas.Top="123" />
+                                    <TextBlock Text="8" Style="{StaticResource ClockHourLabel}" Canvas.Left="18" Canvas.Top="101" />
+                                    <TextBlock Text="9" Style="{StaticResource ClockHourLabel}" Canvas.Left="10" Canvas.Top="71" />
+                                    <TextBlock Text="10" Style="{StaticResource ClockHourLabel}" Canvas.Left="18" Canvas.Top="40" />
+                                    <TextBlock Text="11" Style="{StaticResource ClockHourLabel}" Canvas.Left="40" Canvas.Top="18" />
+                                    <TextBlock Text="00" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="71" Canvas.Top="10" />
+                                    <TextBlock Text="05" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="101" Canvas.Top="18" />
+                                    <TextBlock Text="10" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="123" Canvas.Top="40" />
+                                    <TextBlock Text="15" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="131" Canvas.Top="71" />
+                                    <TextBlock Text="20" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="123" Canvas.Top="101" />
+                                    <TextBlock Text="25" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="101" Canvas.Top="123" />
+                                    <TextBlock Text="30" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="71" Canvas.Top="132" />
+                                    <TextBlock Text="35" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="40" Canvas.Top="123" />
+                                    <TextBlock Text="40" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="18" Canvas.Top="101" />
+                                    <TextBlock Text="45" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="10" Canvas.Top="71" />
+                                    <TextBlock Text="50" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="18" Canvas.Top="40" />
+                                    <TextBlock Text="55" Style="{StaticResource ClockMinuteLabel}" Canvas.Left="40" Canvas.Top="18" />
+                                    <Border Width="24" Height="24" Background="#FF4CAF50" CornerRadius="12"
+                                            Canvas.Left="{Binding DialHandX}" Canvas.Top="{Binding DialHandY}"
+                                            IsHitTestVisible="False">
+                                        <Border.RenderTransform>
+                                            <TranslateTransform X="-12" Y="-12" />
+                                        </Border.RenderTransform>
+                                        <TextBlock Text="{Binding ClockDialSelectionDisplay}" Foreground="White"
+                                                   FontSize="12" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </Canvas>
+                                <Grid Margin="20,0,20,4">
+                                    <Button Content="AM" HorizontalAlignment="Left"
+                                            Style="{StaticResource ClockAmButton}"
+                                            Command="{Binding SelectExactTimePeriodCommand}"
+                                            CommandParameter="AM" />
+                                    <Button Content="PM" HorizontalAlignment="Right"
+                                            Style="{StaticResource ClockPmButton}"
+                                            Command="{Binding SelectExactTimePeriodCommand}"
+                                            CommandParameter="PM" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+                <TextBlock Text="{Binding ExactTimeError}" Foreground="#FFC62828"
+                           FontSize="12" TextWrapping="Wrap" />
 
                 <TextBlock Text="{Binding ErrorText}" Foreground="#FFC62828" TextWrapping="Wrap" Margin="0,10,0,0" />
 
-                <Button Content="Lock now" Command="{Binding LockCommand}"
+                <Button Command="{Binding LockCommand}"
                         Margin="0,12,0,0" Height="52" FontSize="16" FontWeight="SemiBold"
                         Foreground="White" Background="#FF107C10" BorderThickness="0" Cursor="Hand">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                       VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <TextBlock Text="Lock &amp; Save Status" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button.Content>
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border Background="{TemplateBinding Background}" CornerRadius="6">
@@ -134,8 +386,8 @@
                 </Button>
 
                 <Button Content="Cancel (Esc)" Command="{Binding CancelCommand}"
-                        Margin="0,8,0,0" Height="30" Focusable="False"
-                        Background="Transparent" BorderThickness="0" Cursor="Hand" />
+                        Margin="0,8,0,0" Style="{StaticResource SecondaryActionButton}"
+                        Height="36" Width="Auto" HorizontalAlignment="Stretch" />
             </StackPanel>
         </StackPanel>
     </Border>

@@ -9,12 +9,12 @@ internal static class AppSettings
     // Popup khulle ei status ager theke select thakbe ("" dile kichu select thakbe na)
     public const string DefaultStatus = "Break";
 
-    // Lock screen er upore choto caption
-    public const string CaptionText = "AWAY";
-    public const bool ShowDot = true;
+    // Lock screen er upore choto caption (disabled)
+    public const string CaptionText = "";
+    public const bool ShowDot = false;
 
-    // Nicher dike jaruri jogajog er line ("" dile dekhabe na)
-    public const string ContactText = "Urgent? Please call me";
+    // Nicher dike jaruri jogajog er line (disabled)
+    public const string ContactText = "";
 
     // Lock screen er background (na pele solid nil rong)
     public const string BackgroundImage = @"C:\Windows\Web\Screen\img100.jpg";

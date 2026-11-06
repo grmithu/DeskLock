@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace AwayLock;
+namespace DeskLock;
 
 /// <summary>Shob setting ekhane. Nijer moto change korun.</summary>
 internal static class AppSettings
@@ -20,7 +20,7 @@ internal static class AppSettings
     public const string BackgroundImage = @"C:\Windows\Web\Screen\img100.jpg";
 
     public static readonly string ImageFolder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "AwayLock");
+        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "DeskLock");
 
     // Name, R, G, B, default fire asar somoy (minutes)
     public static readonly (string Name, byte R, byte G, byte B, int Minutes)[] Statuses =

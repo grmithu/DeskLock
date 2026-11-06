@@ -1,7 +1,7 @@
-<Window x:Class="AwayLock.Views.MainWindow"
+<Window x:Class="DeskLock.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Away Lock"
+        Title="Desk Lock"
         Width="480"
         SizeToContent="Height"
         WindowStartupLocation="CenterScreen"
@@ -64,7 +64,7 @@
             <!-- Header (drag kora jay) -->
             <Border Background="#FF0F2A44" Padding="16,10" MouseLeftButtonDown="Header_MouseLeftButtonDown">
                 <DockPanel>
-                    <TextBlock Text="Away Lock" Foreground="White" FontWeight="SemiBold" />
+                    <TextBlock Text="Desk Lock" Foreground="White" FontWeight="SemiBold" />
                     <TextBlock Text="Enter = Lock   Esc = Cancel" Foreground="#FFB8C7D9" FontSize="12"
                                HorizontalAlignment="Right" VerticalAlignment="Center" />
                 </DockPanel>

@@ -3,12 +3,12 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Media;
-using AwayLock.Models;
-using AwayLock.Services;
+using DeskLock.Models;
+using DeskLock.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace AwayLock.ViewModels;
+namespace DeskLock.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {

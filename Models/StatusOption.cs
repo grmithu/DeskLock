@@ -1,7 +1,7 @@
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace AwayLock.Models;
+namespace DeskLock.Models;
 
 public partial class StatusOption : ObservableObject
 {

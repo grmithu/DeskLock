@@ -2,7 +2,7 @@ using System;
 using System.Windows.Input;
 using System.Windows.Interop;
 
-namespace AwayLock.Services;
+namespace DeskLock.Services;
 
 /// <summary>Global hotkey (jemon Ctrl+Alt+L). Message-only window diye kaj kore.</summary>
 public sealed class HotkeyService : IDisposable
@@ -19,7 +19,7 @@ public sealed class HotkeyService : IDisposable
     public bool Register(ModifierKeys modifiers, Key key)
     {
         // WPF ModifierKeys er man (Alt=1, Ctrl=2, Shift=4, Win=8) Win32 er shathe milay
-        _source = new HwndSource(0, 0, 0, 0, 0, "AwayLockHotkeyWindow", HwndMessage);
+        _source = new HwndSource(0, 0, 0, 0, 0, "DeskLockHotkeyWindow", HwndMessage);
         _source.AddHook(WndProc);
         var vk = (uint)KeyInterop.VirtualKeyFromKey(key);
         return NativeMethods.RegisterHotKey(_source.Handle, HotkeyId, (uint)modifiers | ModNoRepeat, vk);

@@ -4,7 +4,7 @@ using System.IO;
 using System.Security;
 using System.Text;
 
-namespace AwayLock.Services;
+namespace DeskLock.Services;
 
 /// <summary>
 /// Windows login e app auto chalu korar jonno Task Scheduler task (admin shoho, UAC chhara).
@@ -12,7 +12,7 @@ namespace AwayLock.Services;
 /// </summary>
 public static class StartupService
 {
-    private const string TaskName = "AwayLockApp";
+    private const string TaskName = "DeskLockApp";
 
     public static bool IsEnabled() => RunSchtasks($"/query /tn \"{TaskName}\"") == 0;
 
@@ -57,7 +57,7 @@ public static class StartupService
             </Task>
             """;
 
-        var xmlPath = Path.Combine(Path.GetTempPath(), "AwayLockTask.xml");
+        var xmlPath = Path.Combine(Path.GetTempPath(), "DeskLockTask.xml");
         try
         {
             File.WriteAllText(xmlPath, xml, Encoding.Unicode);

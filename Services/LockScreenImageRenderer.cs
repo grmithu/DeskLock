@@ -5,9 +5,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using AwayLock.Models;
+using DeskLock.Models;
 
-namespace AwayLock.Services;
+namespace DeskLock.Services;
 
 /// <summary>1920x1080 lock screen PNG toiri kore (editorial serif design).</summary>
 public sealed class LockScreenImageRenderer

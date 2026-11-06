@@ -1,4 +1,4 @@
-# Away Lock (WPF, .NET 10, MVVM)
+# Desk Lock (WPF, .NET 10, MVVM)
 
 Hotkey (`Ctrl+Alt+L`) chaple popup ashe. Status + fire asar somoy bachle laptop lock hoy
 ar lock screen e Windows er background er upor editorial style e message dekhay.
@@ -28,10 +28,10 @@ Runtime chhara chalate chaile (boro size):
 
     dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
-Output: `bin\Release\net10.0-windows\win-x64\publish\AwayLock.exe`
+Output: `bin\Release\net10.0-windows\win-x64\publish\DeskLock.exe`
 
 ## Prothom bar
-1. `AwayLock.exe` chalan (UAC te Yes) — tray te nil gol icon ashbe.
+1. `DeskLock.exe` chalan (UAC te Yes) — tray te nil gol icon ashbe.
 2. Tray icon e right-click > **Start with Windows** tick din (login e auto chalu hobe, UAC chhara).
 3. `Ctrl+Alt+L` chapun > status bachun > **Enter**.
 

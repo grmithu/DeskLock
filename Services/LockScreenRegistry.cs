@@ -1,6 +1,6 @@
 using Microsoft.Win32;
 
-namespace AwayLock.Services;
+namespace DeskLock.Services;
 
 /// <summary>Windows er lock screen image registry (PersonalizationCSP) e set/clear kore. Admin lage.</summary>
 public static class LockScreenRegistry

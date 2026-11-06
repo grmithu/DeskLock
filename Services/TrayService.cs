@@ -2,7 +2,7 @@ using System;
 using Drawing = System.Drawing;
 using WinForms = System.Windows.Forms;
 
-namespace AwayLock.Services;
+namespace DeskLock.Services;
 
 /// <summary>System tray icon + menu (WinForms NotifyIcon, kono extra package lage na).</summary>
 public sealed class TrayService : IDisposable
@@ -28,7 +28,7 @@ public sealed class TrayService : IDisposable
         _icon = new WinForms.NotifyIcon
         {
             Icon = CreateIcon(),
-            Text = "Away Lock (Ctrl+Alt+L)",
+            Text = "Desk Lock (Ctrl+Alt+L)",
             Visible = true,
             ContextMenuStrip = menu,
         };
@@ -45,7 +45,7 @@ public sealed class TrayService : IDisposable
     {
         var ok = _startupItem.Checked ? StartupService.Disable() : StartupService.Enable();
         _startupItem.Checked = StartupService.IsEnabled();
-        if (!ok) Notify("Away Lock", "Could not change the startup setting.");
+        if (!ok) Notify("Desk Lock", "Could not change the startup setting.");
     }
 
     private static Drawing.Icon CreateIcon()

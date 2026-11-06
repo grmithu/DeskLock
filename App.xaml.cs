@@ -2,11 +2,11 @@ using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
-using AwayLock.Services;
-using AwayLock.ViewModels;
-using AwayLock.Views;
+using DeskLock.Services;
+using DeskLock.ViewModels;
+using DeskLock.Views;
 
-namespace AwayLock;
+namespace DeskLock;
 
 public partial class App : Application
 {
@@ -23,8 +23,8 @@ public partial class App : Application
         base.OnStartup(e);
 
         // Ek shomoye shudhu ekta instance. Dwitiyo bar chalale ager instance er popup khule dey.
-        _mutex = new Mutex(true, "AwayLock.SingleInstance", out var isFirst);
-        _showEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "AwayLock.ShowPopup");
+        _mutex = new Mutex(true, "DeskLock.SingleInstance", out var isFirst);
+        _showEvent = new EventWaitHandle(false, EventResetMode.AutoReset, "DeskLock.ShowPopup");
         if (!isFirst)
         {
             _showEvent.Set();
@@ -34,7 +34,7 @@ public partial class App : Application
 
         DispatcherUnhandledException += (_, args) =>
         {
-            MessageBox.Show(args.Exception.Message, "Away Lock", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(args.Exception.Message, "Desk Lock", MessageBoxButton.OK, MessageBoxImage.Error);
             args.Handled = true;
         };
 
@@ -59,7 +59,7 @@ public partial class App : Application
             _showEvent, (_, _) => Dispatcher.BeginInvoke(new Action(ShowPopup)), null, Timeout.Infinite, false);
 
         _tray.Notify(
-            "Away Lock is running",
+            "Desk Lock is running",
             hotkeyOk ? "Press Ctrl+Alt+L to set your status." : "Ctrl+Alt+L is already used by another app. Use the tray icon instead.");
     }
 

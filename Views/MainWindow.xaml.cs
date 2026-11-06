@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
-using AwayLock.ViewModels;
+using DeskLock.ViewModels;
 
-namespace AwayLock.Views;
+namespace DeskLock.Views;
 
 public partial class MainWindow : Window
 {

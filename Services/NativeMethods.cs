@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace AwayLock.Services;
+namespace DeskLock.Services;
 
 internal static class NativeMethods
 {

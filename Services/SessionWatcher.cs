@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Win32;
 
-namespace AwayLock.Services;
+namespace DeskLock.Services;
 
 /// <summary>Anlock korle lock screen er message muche dey (ager moto auto reset).</summary>
 public sealed class SessionWatcher : IDisposable

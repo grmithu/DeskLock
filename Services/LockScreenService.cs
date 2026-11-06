@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using AwayLock.Models;
+using DeskLock.Models;
 
-namespace AwayLock.Services;
+namespace DeskLock.Services;
 
 /// <summary>Image toiri + registry set + workstation lock.</summary>
 public sealed class LockScreenService

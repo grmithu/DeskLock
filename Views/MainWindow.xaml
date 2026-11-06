@@ -246,7 +246,7 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <TextBlock Text="Or select an exact return time" Style="{StaticResource SectionLabel}" />
+                <TextBlock Text="Or choose an exact return time" Style="{StaticResource SectionLabel}" />
                 <Grid>
                     <Button x:Name="ExactTimePickerButton"
                             Style="{StaticResource ExactTimePickerButton}"

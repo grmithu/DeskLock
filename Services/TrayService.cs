@@ -43,9 +43,11 @@ public sealed class TrayService : IDisposable
 
     private void ToggleStartup()
     {
-        var ok = _startupItem.Checked ? StartupService.Disable() : StartupService.Enable();
+        var ok = _startupItem.Checked
+            ? StartupService.Disable(out var error)
+            : StartupService.Enable(out error);
         _startupItem.Checked = StartupService.IsEnabled();
-        if (!ok) Notify("Desk Lock", "Could not change the startup setting.");
+        if (!ok) Notify("Desk Lock", $"Could not change the startup setting. {error}");
     }
 
     private static Drawing.Icon CreateIcon()

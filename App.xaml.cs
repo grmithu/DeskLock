@@ -45,9 +45,17 @@ public partial class App : Application
         _window = new MainWindow { DataContext = viewModel };
         viewModel.CloseRequested += () => _window.Hide();
 
+        var startupConfigured = StartupService.ConfigureOnFirstRun(out var startupError);
         _tray = new TrayService();
         _tray.OpenRequested += ShowPopup;
         _tray.ExitRequested += ExitApp;
+
+        if (!startupConfigured)
+        {
+            _tray.Notify(
+                "Desk Lock",
+                $"Could not configure Start with Windows. DeskLock is still running. {startupError}");
+        }
 
         _hotkey = new HotkeyService();
         _hotkey.Pressed += ShowPopup;
@@ -60,10 +68,16 @@ public partial class App : Application
 
         _tray.Notify(
             "Desk Lock is running",
-            hotkeyOk ? "Press Ctrl+Alt+L to set your status." : "Ctrl+Alt+L is already used by another app. Use the tray icon instead.");
+            hotkeyOk
+                ? "Press Ctrl+Alt+L to set your status."
+                : $"Could not register Ctrl+Alt+L: {_hotkey.RegistrationError} Use the tray icon instead.");
     }
 
-    private void ShowPopup() => _window?.ShowPopup();
+    private void ShowPopup()
+    {
+        if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
+        Dispatcher.BeginInvoke(new Action(() => _window?.ShowPopup()));
+    }
 
     private void ExitApp()
     {

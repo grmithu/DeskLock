@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Security;
@@ -13,13 +14,41 @@ namespace DeskLock.Services;
 public static class StartupService
 {
     private const string TaskName = "DeskLockApp";
+    private static readonly string SetupCompletePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "DeskLock",
+        "startup-configured");
 
-    public static bool IsEnabled() => RunSchtasks($"/query /tn \"{TaskName}\"") == 0;
+    public static bool IsEnabled() => RunSchtasks($"/query /tn \"{TaskName}\"", out _) == 0;
 
-    public static bool Enable()
+    public static bool ConfigureOnFirstRun(out string? error)
     {
+        error = null;
+        if (File.Exists(SetupCompletePath)) return true;
+        if (!Enable(out error)) return false;
+
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(SetupCompletePath)!);
+            File.WriteAllText(SetupCompletePath, string.Empty);
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
+        {
+            error = $"Startup was enabled, but DeskLock could not save its setup state: {ex.Message}";
+            return false;
+        }
+    }
+
+    public static bool Enable(out string? error)
+    {
+        error = null;
         var exe = Environment.ProcessPath;
-        if (string.IsNullOrEmpty(exe)) return false;
+        if (string.IsNullOrEmpty(exe))
+        {
+            error = "Could not determine the DeskLock executable path.";
+            return false;
+        }
 
         var user = SecurityElement.Escape($"{Environment.UserDomainName}\\{Environment.UserName}");
         var command = SecurityElement.Escape(exe);
@@ -57,11 +86,16 @@ public static class StartupService
             </Task>
             """;
 
-        var xmlPath = Path.Combine(Path.GetTempPath(), "DeskLockTask.xml");
+        var xmlPath = Path.Combine(Path.GetTempPath(), $"DeskLockTask-{Guid.NewGuid():N}.xml");
         try
         {
             File.WriteAllText(xmlPath, xml, Encoding.Unicode);
-            return RunSchtasks($"/create /tn \"{TaskName}\" /xml \"{xmlPath}\" /f") == 0;
+            return RunSchtasks($"/create /tn \"{TaskName}\" /xml \"{xmlPath}\" /f", out error) == 0;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
+        {
+            error = ex.Message;
+            return false;
         }
         finally
         {
@@ -69,10 +103,12 @@ public static class StartupService
         }
     }
 
-    public static bool Disable() => RunSchtasks($"/delete /tn \"{TaskName}\" /f") == 0;
+    public static bool Disable(out string? error) =>
+        RunSchtasks($"/delete /tn \"{TaskName}\" /f", out error) == 0;
 
-    private static int RunSchtasks(string arguments)
+    private static int RunSchtasks(string arguments, out string? error)
     {
+        error = null;
         var info = new ProcessStartInfo("schtasks.exe", arguments)
         {
             CreateNoWindow = true,
@@ -80,11 +116,34 @@ public static class StartupService
             RedirectStandardOutput = true,
             RedirectStandardError = true,
         };
-        using var process = Process.Start(info);
-        if (process is null) return -1;
-        process.StandardOutput.ReadToEnd();
-        process.StandardError.ReadToEnd();
-        process.WaitForExit();
-        return process.ExitCode;
+
+        try
+        {
+            using var process = Process.Start(info);
+            if (process is null)
+            {
+                error = "Windows did not start schtasks.exe.";
+                return -1;
+            }
+
+            var output = process.StandardOutput.ReadToEnd();
+            var errorOutput = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+            if (process.ExitCode != 0)
+            {
+                error = !string.IsNullOrWhiteSpace(errorOutput)
+                    ? errorOutput.Trim()
+                    : !string.IsNullOrWhiteSpace(output)
+                        ? output.Trim()
+                        : $"schtasks.exe exited with code {process.ExitCode}.";
+            }
+
+            return process.ExitCode;
+        }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException or IOException)
+        {
+            error = ex.Message;
+            return -1;
+        }
     }
 }

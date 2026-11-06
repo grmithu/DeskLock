@@ -30,10 +30,19 @@ Runtime chhara chalate chaile (boro size):
 
 Output: `bin\Release\net10.0-windows\win-x64\publish\DeskLock.exe`
 
+## Recommended workflow
+1. Run `DeskLock.exe` (approve the UAC prompt). DeskLock configures Windows login startup on the first successful launch and stays in the system tray; the status dialog does not open automatically.
+2. Press `Ctrl+Alt+L` at any time, or click the tray icon, to open the status dialog.
+3. Choose a status and press **Enter** or **Lock now** to apply it and lock the PC.
+4. Press **Esc** or **Cancel** to hide the dialog. DeskLock keeps running in the tray.
+5. Choose **Exit** from the tray menu to close DeskLock completely.
+
+Use the tray menu's **Start with Windows** option to disable or re-enable automatic login startup. If automatic setup fails, DeskLock remains running and shows an error notification; use **Start with Windows** in the tray menu to retry.
+
 ## Prothom bar
-1. `DeskLock.exe` chalan (UAC te Yes) — tray te nil gol icon ashbe.
-2. Tray icon e right-click > **Start with Windows** tick din (login e auto chalu hobe, UAC chhara).
-3. `Ctrl+Alt+L` chapun > status bachun > **Enter**.
+1. `DeskLock.exe` chalan (UAC te Yes) — tray te nil gol icon ashbe, dialog khulbe na.
+2. `Ctrl+Alt+L` chapun > status bachun > **Enter**.
+3. Login e auto chalu hobe; tray menu theke **Start with Windows** untick kore eta bondho korte parben.
 
 ## Setting
 `AppSettings.cs` e: default status, status/rong/default somoy, caption (`AWAY`), jaruri jogajog line,

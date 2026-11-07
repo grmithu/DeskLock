@@ -12,15 +12,15 @@
         Background="#FFF7F7F7"
         FontFamily="Segoe UI"
         FontSize="14"
-        PreviewKeyDown="Window_PreviewKeyDown">
+        PreviewKeyDown="Window_PreviewKeyDown"
+        PreviewLostKeyboardFocus="Window_PreviewLostKeyboardFocus"
+        PreviewMouseDown="Window_PreviewMouseDown">
 
     <Window.InputBindings>
-        <KeyBinding Key="Return" Command="{Binding LockCommand}" />
         <KeyBinding Key="Escape" Command="{Binding CancelCommand}" />
     </Window.InputBindings>
 
     <Window.Resources>
-        <!-- Shob option button er base style (keyboard focus nei, jate Enter shob shomoy Lock kore) -->
         <Style x:Key="OptionButton" TargetType="Button">
             <Setter Property="Focusable" Value="False" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />

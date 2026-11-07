@@ -13,6 +13,8 @@ namespace DeskLock.Views;
 
 public partial class MainWindow : Window
 {
+    private Button? _enterArmedTimeOption;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -68,18 +70,64 @@ public partial class MainWindow : Window
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Return &&
-            Keyboard.FocusedElement is Button focusedTimeButton &&
-            TimeOptions is not null &&
-            TimeOptions.Items.Contains(focusedTimeButton.DataContext))
+        var focusedTimeButton = Keyboard.FocusedElement is Button focusedButton &&
+                                TimeOptions is not null &&
+                                TimeOptions.Items.Contains(focusedButton.DataContext)
+            ? focusedButton
+            : null;
+        var focusedStatusButton = Keyboard.FocusedElement is Button statusButton &&
+                                   StatusOptions is not null &&
+                                   StatusOptions.Items.Contains(statusButton.DataContext)
+            ? statusButton
+            : null;
+
+        if (e.Key == Key.Return)
         {
-            if (focusedTimeButton.Command is not null &&
-                focusedTimeButton.Command.CanExecute(focusedTimeButton.CommandParameter))
+            if (e.IsRepeat)
             {
-                focusedTimeButton.Command.Execute(focusedTimeButton.CommandParameter);
+                e.Handled = true;
+                return;
+            }
+
+            if (focusedTimeButton is not null)
+            {
+                if (ReferenceEquals(_enterArmedTimeOption, focusedTimeButton))
+                {
+                    ExecuteLockCommand();
+                }
+                else
+                {
+                    ExecuteButtonCommand(focusedTimeButton);
+                    _enterArmedTimeOption = focusedTimeButton;
+                }
+            }
+            else
+            {
+                _enterArmedTimeOption = null;
+                if (focusedStatusButton is not null &&
+                    DataContext is MainViewModel viewModel &&
+                    !ReferenceEquals(focusedStatusButton.DataContext, viewModel.SelectedStatus))
+                {
+                    ExecuteButtonCommand(focusedStatusButton);
+                    e.Handled = true;
+                    return;
+                }
+
+                ExecuteLockCommand();
             }
 
             e.Handled = true;
+            return;
+        }
+
+        if (e.Key == Key.Space)
+        {
+            _enterArmedTimeOption = null;
+            if (focusedTimeButton is not null)
+            {
+                ExecuteButtonCommand(focusedTimeButton);
+                e.Handled = true;
+            }
             return;
         }
 
@@ -88,9 +136,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        var focusedTimeOption = Keyboard.FocusedElement is Button focusedButton &&
-                                TimeOptions is not null &&
-                                TimeOptions.Items.Contains(focusedButton.DataContext);
+        var focusedTimeOption = focusedTimeButton is not null;
         if (focusedTimeOption && (e.Key is Key.Up or Key.Down))
         {
             return;
@@ -162,6 +208,35 @@ public partial class MainWindow : Window
         }
 
         e.Handled = true;
+    }
+
+    private void Window_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        if (ReferenceEquals(e.OldFocus, _enterArmedTimeOption))
+        {
+            _enterArmedTimeOption = null;
+        }
+    }
+
+    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e) =>
+        _enterArmedTimeOption = null;
+
+    private void ExecuteLockCommand()
+    {
+        if (DataContext is MainViewModel viewModel &&
+            viewModel.LockCommand.CanExecute(null))
+        {
+            viewModel.LockCommand.Execute(null);
+        }
+    }
+
+    private static void ExecuteButtonCommand(Button button)
+    {
+        if (button.Command is not null &&
+            button.Command.CanExecute(button.CommandParameter))
+        {
+            button.Command.Execute(button.CommandParameter);
+        }
     }
 
     private bool TryGetGridNavigationTarget(out List<Button> targetButtons, out int columns, out int currentIndex)

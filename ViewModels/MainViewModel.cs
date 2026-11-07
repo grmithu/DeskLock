@@ -61,12 +61,24 @@ public partial class MainViewModel : ObservableObject
     {
         if (oldValue is not null) oldValue.IsSelected = false;
         if (newValue is not null) newValue.IsSelected = true;
+        if (newValue is not null && !string.IsNullOrEmpty(CustomMessage))
+        {
+            Suppressed(() => CustomMessage = "");
+        }
     }
 
     partial void OnSelectedTimeChanged(TimeOption? oldValue, TimeOption? newValue)
     {
         if (oldValue is not null) oldValue.IsSelected = false;
         if (newValue is not null) newValue.IsSelected = true;
+    }
+
+    partial void OnCustomMessageChanged(string value)
+    {
+        if (!_suppress && !string.IsNullOrEmpty(value))
+        {
+            SelectedStatus = null;
+        }
     }
 
     partial void OnExactTimeErrorChanged(string value) =>
@@ -151,7 +163,6 @@ public partial class MainViewModel : ObservableObject
     {
         if (option is null) return;
         SelectedStatus = option;
-        Suppressed(() => CustomMessage = "");
 
         // Nijer hate time na bachle status er default time auto select hobe
         if (!_timeTouched && string.IsNullOrWhiteSpace(ExactTime))
@@ -262,7 +273,7 @@ public partial class MainViewModel : ObservableObject
             returnTime = lockMoment.AddMinutes(time.Minutes);
         }
 
-        var theme = SelectedStatus?.Definition ?? Statuses[0].Definition;
+        var theme = SelectedStatus?.Definition ?? AppSettings.CustomMessageTheme;
 
         try
         {

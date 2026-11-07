@@ -25,7 +25,7 @@ public sealed class LockScreenImageRenderer
     {
         var previewFolder = Path.Combine(AppSettings.ImageFolder, "previews");
         Directory.CreateDirectory(previewFolder);
-        var paths = new string[AppSettings.Statuses.Length];
+        var paths = new string[AppSettings.Statuses.Length + 1];
 
         for (var i = 0; i < AppSettings.Statuses.Length; i++)
         {
@@ -34,6 +34,14 @@ public sealed class LockScreenImageRenderer
             paths[i] = Path.Combine(previewFolder, $"{status.IconKey}.png");
             RenderToFile(info, paths[i]);
         }
+
+        var customMessagePath = Path.Combine(previewFolder, "message-dots.png");
+        var customMessage = new AwayInfo(
+            "In a client call",
+            DateTime.Now.AddMinutes(30),
+            AppSettings.CustomMessageTheme);
+        RenderToFile(customMessage, customMessagePath);
+        paths[^1] = customMessagePath;
 
         return paths;
     }
@@ -68,6 +76,7 @@ public sealed class LockScreenImageRenderer
     private static void Draw(DrawingContext context, AwayInfo info, int width, int height)
     {
         var screenHeight = (double)height;
+        var isCustomMessage = info.Theme.IconKey == "message-dots";
         var iconSize = screenHeight * 0.09;
         var iconLabelGap = screenHeight * 0.02;
         var labelSize = screenHeight * 0.05;
@@ -110,16 +119,23 @@ public sealed class LockScreenImageRenderer
 
         context.DrawRectangle(Solid(info.Theme.LockColor), null, new Rect(0, 0, width, height));
 
-        var iconPen = new Pen(Solid(Colors.White), 2)
+        if (isCustomMessage)
         {
-            StartLineCap = PenLineCap.Round,
-            EndLineCap = PenLineCap.Round,
-            LineJoin = PenLineJoin.Round
-        };
-        iconPen.Freeze();
-        context.PushTransform(iconTransform);
-        context.DrawGeometry(null, iconPen, info.Theme.IconGeometry);
-        context.Pop();
+            DrawMessageDotsIcon(context, iconTransform);
+        }
+        else
+        {
+            var iconPen = new Pen(Solid(Colors.White), 2)
+            {
+                StartLineCap = PenLineCap.Round,
+                EndLineCap = PenLineCap.Round,
+                LineJoin = PenLineJoin.Round
+            };
+            iconPen.Freeze();
+            context.PushTransform(iconTransform);
+            context.DrawGeometry(null, iconPen, info.Theme.IconGeometry);
+            context.Pop();
+        }
 
         var labelY = top + iconSize + iconLabelGap;
         context.DrawText(label, new Point((width - labelWidth) / 2, labelY));
@@ -129,6 +145,28 @@ public sealed class LockScreenImageRenderer
             var returnY = labelY + label.Height + labelReturnGap;
             context.DrawText(returnLine, new Point((width - returnLine.Width) / 2, returnY));
         }
+    }
+
+    private static void DrawMessageDotsIcon(DrawingContext context, Transform transform)
+    {
+        var white = Solid(Colors.White);
+        var pen = new Pen(white, 2)
+        {
+            StartLineCap = PenLineCap.Round,
+            EndLineCap = PenLineCap.Round,
+            LineJoin = PenLineJoin.Round
+        };
+        pen.Freeze();
+
+        var bubble = Geometry.Parse("M5 3h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-6l-6 4v-4h-2a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2z");
+        bubble.Freeze();
+        context.PushTransform(transform);
+        context.DrawGeometry(null, pen, bubble);
+        foreach (var x in new[] { 8.5, 12, 15.5 })
+        {
+            context.DrawEllipse(white, null, new Point(x, 10), 0.65, 0.65);
+        }
+        context.Pop();
     }
 
     private static FormattedText MakeLabel(string text, double maxWidth, double fontSize)

@@ -13,6 +13,9 @@ internal static class AppSettings
     public static readonly string ImageFolder = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DeskLock");
 
+    public static readonly StatusDefinition CustomMessageTheme =
+        new("Custom Message", 0, "Custom away message", "#A02D6B", "#F2CFE0", "message-dots");
+
     public static readonly StatusDefinition[] Statuses =
     {
         new("Break", 10, "Short break from work", "#854F0B", "#FAC775", "coffee"),

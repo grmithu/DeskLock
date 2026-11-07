@@ -353,13 +353,13 @@
                         </DockPanel>
                     </Button>
                     <Popup PlacementTarget="{Binding ElementName=ExactTimePickerButton}"
-                           Placement="Bottom"
+                           Placement="Top"
                            IsOpen="{Binding IsExactTimePickerOpen, Mode=TwoWay}"
                            DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                            StaysOpen="False"
                            AllowsTransparency="True">
                         <Border Width="194" Background="#FFF9FBF9" BorderBrush="#FFBBBBBB"
-                                BorderThickness="1" CornerRadius="4" Margin="0,4,0,0">
+                                BorderThickness="1" CornerRadius="4" Margin="0,0,0,4">
                             <StackPanel>
                                 <Grid Height="70" Background="#FF4CAF50">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"

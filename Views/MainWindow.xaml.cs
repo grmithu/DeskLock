@@ -68,7 +68,30 @@ public partial class MainWindow : Window
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (e.Key == Key.Return &&
+            Keyboard.FocusedElement is Button focusedTimeButton &&
+            TimeOptions is not null &&
+            TimeOptions.Items.Contains(focusedTimeButton.DataContext))
+        {
+            if (focusedTimeButton.Command is not null &&
+                focusedTimeButton.Command.CanExecute(focusedTimeButton.CommandParameter))
+            {
+                focusedTimeButton.Command.Execute(focusedTimeButton.CommandParameter);
+            }
+
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key is not (Key.Left or Key.Right or Key.Up or Key.Down))
+        {
+            return;
+        }
+
+        var focusedTimeOption = Keyboard.FocusedElement is Button focusedButton &&
+                                TimeOptions is not null &&
+                                TimeOptions.Items.Contains(focusedButton.DataContext);
+        if (focusedTimeOption && (e.Key is Key.Up or Key.Down))
         {
             return;
         }
@@ -131,7 +154,9 @@ public partial class MainWindow : Window
 
         var targetButton = targetButtons[targetIndex];
         targetButton.Focus();
-        if (targetButton.Command is not null && targetButton.Command.CanExecute(targetButton.CommandParameter))
+        if (!focusedTimeOption &&
+            targetButton.Command is not null &&
+            targetButton.Command.CanExecute(targetButton.CommandParameter))
         {
             targetButton.Command.Execute(targetButton.CommandParameter);
         }

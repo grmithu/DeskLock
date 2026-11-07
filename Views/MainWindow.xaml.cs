@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using DeskLock.ViewModels;
 
 namespace DeskLock.Views;
@@ -30,7 +31,21 @@ public partial class MainWindow : Window
         Show();
         WindowState = WindowState.Normal;
         Activate();
-        Focus();
+        Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(FocusSelectedStatusOption));
+    }
+
+    private void FocusSelectedStatusOption()
+    {
+        var statusButtons = FindGridButtons(StatusOptions);
+        var selectedButton = statusButtons.FirstOrDefault(button =>
+            DataContext is MainViewModel viewModel &&
+            button.DataContext == viewModel.SelectedStatus);
+
+        if ((selectedButton ?? statusButtons.FirstOrDefault()) is { } button)
+        {
+            FocusManager.SetFocusedElement(this, button);
+            Keyboard.Focus(button);
+        }
     }
 
     protected override void OnClosing(CancelEventArgs e)
@@ -130,21 +145,35 @@ public partial class MainWindow : Window
         columns = 0;
         currentIndex = -1;
 
-        var focusedButton = Keyboard.FocusedElement as Button;
-        if (focusedButton is null)
-        {
-            return false;
-        }
-
-        if (StatusOptions is not null && StatusOptions.Items.Contains(focusedButton.DataContext))
+        var focusedElement = Keyboard.FocusedElement;
+        var focusedButton = focusedElement as Button;
+        if (focusedButton is not null &&
+            StatusOptions is not null &&
+            StatusOptions.Items.Contains(focusedButton.DataContext))
         {
             targetButtons = FindGridButtons(StatusOptions);
             columns = 2;
         }
-        else if (TimeOptions is not null && TimeOptions.Items.Contains(focusedButton.DataContext))
+        else if (focusedButton is not null &&
+                 TimeOptions is not null &&
+                 TimeOptions.Items.Contains(focusedButton.DataContext))
         {
             targetButtons = FindGridButtons(TimeOptions);
             columns = 5;
+        }
+        else if (focusedElement is null || ReferenceEquals(focusedElement, this))
+        {
+            if (StatusOptions is null ||
+                DataContext is not MainViewModel viewModel ||
+                viewModel.SelectedStatus is null)
+            {
+                return false;
+            }
+
+            targetButtons = FindGridButtons(StatusOptions);
+            columns = 2;
+            currentIndex = StatusOptions.Items.IndexOf(viewModel.SelectedStatus);
+            return currentIndex >= 0 && currentIndex < targetButtons.Count;
         }
         else
         {

@@ -312,9 +312,27 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <TextBlock Text="Or write your custom message" Style="{StaticResource SectionLabel}" />
-                <TextBox Text="{Binding CustomMessage, UpdateSourceTrigger=PropertyChanged}"
-                         Padding="6,5" BorderBrush="#FFBBBBBB" />
+                <TextBlock Text="Custom Message" Style="{StaticResource SectionLabel}" />
+                <Grid>
+                    <TextBox Text="{Binding CustomMessage, UpdateSourceTrigger=PropertyChanged}"
+                             Padding="6,5" BorderBrush="#FFBBBBBB" />
+                    <TextBlock Text="Write your custom message..."
+                               Margin="8,0"
+                               Foreground="#FF777777"
+                               VerticalAlignment="Center"
+                               IsHitTestVisible="False">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CustomMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
 
                 <TextBlock Text="Expected Return" Style="{StaticResource SectionLabel}" />
                 <ItemsControl x:Name="TimeOptions" ItemsSource="{Binding TimeOptions}" Focusable="False">
@@ -462,7 +480,7 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <TextBlock Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                        VerticalAlignment="Center" Margin="0,0,10,0" />
-                            <TextBlock Text="Lock &amp; Save Status" VerticalAlignment="Center" />
+                            <TextBlock Text="Lock Now" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button.Content>
                     <Button.Template>

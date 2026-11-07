@@ -18,14 +18,14 @@ internal static class AppSettings
 
     public static readonly StatusDefinition[] Statuses =
     {
-        new("Break", 10, "Short break from work", "#854F0B", "#FAC775", "coffee"),
-        new("Lunch", 30, "Having lunch", "#993C1D", "#F5C4B3", "tools-kitchen-2"),
+        new("Break", 10, "Short break from work", "#534AB7", "#CECBF6", "coffee"),
+        new("Lunch", 30, "Having lunch", "#0F6E56", "#9FE1CB", "tools-kitchen-2"),
         new("Prayer", 10, "Going for prayer", "#1E5A34", "#C8EBD5", "building-mosque"),
         new("Meeting", 60, "Attending a meeting", "#A32D2D", "#F7C1C1", "users"),
         new("Away from Desk", 0, "Away from my desk", "#185FA5", "#B5D4F4", "walk"),
-        new("On Another Floor", 0, "Visiting another floor", "#0F6E56", "#9FE1CB", "stairs"),
+        new("On Another Floor", 0, "Visiting another floor", "#993C1D", "#F5C4B3", "stairs"),
         new("Refreshment Break", 0, "Tea, coffee or snacks", "#4A5F14", "#D6E6A0", "cookie"),
-        new("Outside Office", 60, "Outside the office", "#534AB7", "#CECBF6", "map-pin"),
+        new("Outside Office", 60, "Outside the office", "#854F0B", "#FAC775", "map-pin"),
     };
 
     public static readonly (string Label, int Minutes)[] TimeOptions =

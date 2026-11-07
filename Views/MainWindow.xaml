@@ -106,13 +106,19 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="24" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"
-                                           Text="{Binding IconGlyph}"
-                                           FontFamily="Segoe MDL2 Assets"
-                                           FontSize="24"
-                                           Foreground="{Binding Brush}"
-                                           VerticalAlignment="Center"
-                                           HorizontalAlignment="Left" />
+                                <Path Grid.Column="0"
+                                      Data="{Binding IconGeometry}"
+                                      Fill="Transparent"
+                                      Width="24"
+                                      Height="24"
+                                      Stretch="Uniform"
+                                      Stroke="{Binding Brush}"
+                                      StrokeThickness="2"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Left" />
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,2,0">
                                     <TextBlock Text="{Binding Name}"
                                                FontSize="14"

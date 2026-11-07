@@ -1,137 +1,181 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using DeskLock.Models;
+using FormsScreen = System.Windows.Forms.Screen;
 
 namespace DeskLock.Services;
 
-/// <summary>1920x1080 lock screen PNG toiri kore (editorial serif design).</summary>
 public sealed class LockScreenImageRenderer
 {
-    private const int W = 1920;
-    private const int H = 1080;
+    private const double PixelsPerDip = 1.0;
 
     public string Render(AwayInfo info)
     {
         Directory.CreateDirectory(AppSettings.ImageFolder);
-        foreach (var old in Directory.EnumerateFiles(AppSettings.ImageFolder, "away_*.png"))
+        var path = Path.Combine(AppSettings.ImageFolder, "lock.png");
+        RenderToFile(info, path);
+        return path;
+    }
+
+    public string[] RenderThemePreviews()
+    {
+        var previewFolder = Path.Combine(AppSettings.ImageFolder, "previews");
+        Directory.CreateDirectory(previewFolder);
+        var paths = new string[AppSettings.Statuses.Length];
+
+        for (var i = 0; i < AppSettings.Statuses.Length; i++)
         {
-            try { File.Delete(old); } catch { /* ignore */ }
+            var status = AppSettings.Statuses[i];
+            var info = new AwayInfo(status.Name, DateTime.Now.AddMinutes(30), status);
+            paths[i] = Path.Combine(previewFolder, $"{status.IconKey}.png");
+            RenderToFile(info, paths[i]);
         }
 
-        // Notun file name, jate Windows purono cache na dekhay
-        var path = Path.Combine(AppSettings.ImageFolder, $"away_{DateTime.Now:yyyyMMddHHmmssfff}.png");
+        return paths;
+    }
+
+    private static void RenderToFile(AwayInfo info, string path)
+    {
+        var screen = FormsScreen.PrimaryScreen
+            ?? throw new InvalidOperationException("The primary display could not be determined.");
+        var width = screen.Bounds.Width;
+        var height = screen.Bounds.Height;
+        if (width <= 0 || height <= 0)
+        {
+            throw new InvalidOperationException("The primary display has invalid dimensions.");
+        }
 
         var visual = new DrawingVisual();
-        using (var dc = visual.RenderOpen())
+        using (var context = visual.RenderOpen())
         {
-            Draw(dc, info);
+            Draw(context, info, width, height);
         }
 
-        var bitmap = new RenderTargetBitmap(W, H, 96, 96, PixelFormats.Pbgra32);
+        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
         bitmap.Render(visual);
+        bitmap.Freeze();
 
         var encoder = new PngBitmapEncoder();
         encoder.Frames.Add(BitmapFrame.Create(bitmap));
         using var stream = File.Create(path);
         encoder.Save(stream);
-        return path;
     }
 
-    private static void Draw(DrawingContext dc, AwayInfo info)
+    private static void Draw(DrawingContext context, AwayInfo info, int width, int height)
     {
-        DrawBackground(dc);
+        var screenHeight = (double)height;
+        var iconSize = screenHeight * 0.09;
+        var iconLabelGap = screenHeight * 0.02;
+        var labelSize = screenHeight * 0.05;
+        var labelReturnGap = screenHeight * 0.012;
+        var returnSize = screenHeight * 0.03;
 
-        var bangla = ContainsBangla(info.Message + info.SubText + AppSettings.ContactText);
-        var mainFont = bangla ? "Nirmala UI" : "Georgia";
-        var mainWeight = bangla ? FontWeights.Bold : FontWeights.Normal;
-        var subStyle = bangla ? FontStyles.Normal : FontStyles.Italic;
-
-        var white = Solid(Colors.White);
-        var soft = Solid(Color.FromArgb(205, 255, 255, 255));
-        var dotBrush = Solid(info.Accent);
-        var linePen = new Pen(Solid(Color.FromArgb(190, 255, 255, 255)), 2);
-        linePen.Freeze();
-
-        // 1) Caption (spaced letters) + choto dot. Windows er ghori/tarikh upore thake, tai shob nicher ongshe.
-        var spaced = string.Join(" ", AppSettings.CaptionText.ToUpperInvariant().ToCharArray());
-        var caption = MakeText(spaced, "Segoe UI Semibold", FontStyles.Normal, FontWeights.Normal, 35, soft);
-        const double dotD = 22, dotGap = 18, capY = 560;
-        var groupW = (AppSettings.ShowDot ? dotD + dotGap : 0) + caption.Width;
-        var capX = (W - groupW) / 2;
-
-        if (AppSettings.ShowDot)
+        var labelWidth = width * 0.7;
+        var label = MakeLabel(info.Message, labelWidth, labelSize);
+        FormattedText? returnLine = null;
+        if (info.ReturnTime is DateTime returnTime)
         {
-            dc.DrawEllipse(dotBrush, null, new Point(capX + dotD / 2, capY + caption.Height / 2), dotD / 2, dotD / 2);
-            dc.DrawText(caption, new Point(capX + dotD + dotGap, capY));
-        }
-        else
-        {
-            dc.DrawText(caption, new Point(capX, capY));
+            var returnText = returnTime <= DateTime.Now
+                ? "Should be back soon"
+                : "Back at " + returnTime.ToLocalTime().ToString("h:mm tt", CultureInfo.InvariantCulture);
+            returnLine = MakeText(
+                returnText,
+                "Segoe UI",
+                FontStyles.Normal,
+                FontWeights.Normal,
+                returnSize,
+                Solid(info.Theme.LockSubColor));
         }
 
-        // 2) Message (boro serif headline). Lomba hole font nijei choto hoy.
-        double size = 117;
-        FormattedText message;
-        do
+        var contentHeight = iconSize + iconLabelGap + label.Height;
+        if (returnLine is not null)
         {
-            message = MakeText(info.Message, mainFont, FontStyles.Normal, mainWeight, size, white);
-            size -= 8;
-        } while (message.Width > 1500 && size > 40);
-
-        var msgY = capY + caption.Height + 14;
-        dc.DrawText(message, new Point((W - message.Width) / 2, msgY));
-
-        // 3) Patla dag + "Back at ..." (italic)
-        var nextY = msgY + message.Height + 22;
-        if (!string.IsNullOrWhiteSpace(info.SubText))
-        {
-            dc.DrawLine(linePen, new Point(W / 2.0 - 160, nextY), new Point(W / 2.0 + 160, nextY));
-            var sub = MakeText(info.SubText, mainFont, subStyle, FontWeights.Normal, 53, soft);
-            dc.DrawText(sub, new Point((W - sub.Width) / 2, nextY + 24));
+            contentHeight += labelReturnGap + returnLine.Height;
         }
 
-        // 4) Jaruri jogajog
-        if (!string.IsNullOrWhiteSpace(AppSettings.ContactText))
+        var top = (height - contentHeight) / 2;
+        var iconScale = iconSize / 24;
+        var iconTransform = new MatrixTransform(new Matrix(
+            iconScale,
+            0,
+            0,
+            iconScale,
+            (width - iconSize) / 2,
+            top));
+        iconTransform.Freeze();
+
+        context.DrawRectangle(Solid(info.Theme.LockColor), null, new Rect(0, 0, width, height));
+
+        var iconPen = new Pen(Solid(Colors.White), 2)
         {
-            var contact = MakeText(AppSettings.ContactText, mainFont, subStyle, FontWeights.Normal, 37, soft);
-            dc.DrawText(contact, new Point((W - contact.Width) / 2, 930));
+            StartLineCap = PenLineCap.Round,
+            EndLineCap = PenLineCap.Round,
+            LineJoin = PenLineJoin.Round
+        };
+        iconPen.Freeze();
+        context.PushTransform(iconTransform);
+        context.DrawGeometry(null, iconPen, info.Theme.IconGeometry);
+        context.Pop();
+
+        var labelY = top + iconSize + iconLabelGap;
+        context.DrawText(label, new Point((width - labelWidth) / 2, labelY));
+
+        if (returnLine is not null)
+        {
+            var returnY = labelY + label.Height + labelReturnGap;
+            context.DrawText(returnLine, new Point((width - returnLine.Width) / 2, returnY));
         }
     }
 
-    private static void DrawBackground(DrawingContext dc)
+    private static FormattedText MakeLabel(string text, double maxWidth, double fontSize)
     {
-        var rect = new Rect(0, 0, W, H);
-        try
+        var minimumSize = fontSize * 0.7;
+        FormattedText formatted;
+        while (true)
         {
-            if (File.Exists(AppSettings.BackgroundImage))
+            formatted = MakeText(
+                text,
+                "Segoe UI",
+                FontStyles.Normal,
+                FontWeights.SemiBold,
+                fontSize,
+                Solid(Colors.White));
+            formatted.MaxTextWidth = maxWidth;
+            formatted.TextAlignment = TextAlignment.Center;
+            formatted.LineHeight = fontSize * 1.2;
+            if (formatted.Height <= formatted.LineHeight * 2 || fontSize <= minimumSize)
             {
-                var image = new BitmapImage();
-                image.BeginInit();
-                image.UriSource = new Uri(AppSettings.BackgroundImage);
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.EndInit();
-                image.Freeze();
-                dc.DrawImage(image, rect);
-                return;
+                break;
             }
-        }
-        catch
-        {
-            // fallback niche
+
+            fontSize = Math.Max(minimumSize, fontSize - 1);
         }
 
-        dc.DrawRectangle(Solid(Color.FromRgb(0, 90, 158)), null, rect);
+        formatted.MaxLineCount = 2;
+        formatted.Trimming = TextTrimming.CharacterEllipsis;
+        return formatted;
     }
 
-    private static FormattedText MakeText(string text, string family, FontStyle style, FontWeight weight, double size, Brush brush)
+    private static FormattedText MakeText(
+        string text,
+        string family,
+        FontStyle style,
+        FontWeight weight,
+        double size,
+        Brush brush)
     {
-        var typeface = new Typeface(new FontFamily(family), style, weight, FontStretches.Normal);
-        return new FormattedText(text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, size, brush, 1.0);
+        return new FormattedText(
+            text,
+            CultureInfo.InvariantCulture,
+            FlowDirection.LeftToRight,
+            new Typeface(new FontFamily(family), style, weight, FontStretches.Normal),
+            size,
+            brush,
+            PixelsPerDip);
     }
 
     private static SolidColorBrush Solid(Color color)
@@ -140,6 +184,4 @@ public sealed class LockScreenImageRenderer
         brush.Freeze();
         return brush;
     }
-
-    private static bool ContainsBangla(string text) => text.Any(c => c >= '\u0980' && c <= '\u09FF');
 }

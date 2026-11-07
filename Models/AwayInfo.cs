@@ -1,6 +1,5 @@
-using System.Windows.Media;
+using System;
 
 namespace DeskLock.Models;
 
-/// <summary>Lock screen e ja dekhano hobe.</summary>
-public sealed record AwayInfo(string Message, string SubText, Color Accent);
+public sealed record AwayInfo(string Message, DateTime? ReturnTime, StatusDefinition Theme);

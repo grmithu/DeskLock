@@ -1,7 +1,7 @@
 # Desk Lock (WPF, .NET 10, MVVM)
 
 Hotkey (`Ctrl+Alt+L`) chaple popup ashe. Status + fire asar somoy bachle laptop lock hoy
-ar lock screen e Windows er background er upor editorial style e message dekhay.
+ar lock screen e status-onujayi solid-color theme, icon, message, ebong ferar somoy dekhay.
 Anlock korle message nije theke muche jay.
 
 ## Requirements
@@ -17,6 +17,16 @@ Admin Terminal (PowerShell/CMD "Run as administrator") theke, project folder e:
 
 > Non-admin terminal theke `dotnet run` dile "requires elevation" error ashe — eta shabhabik.
 > Visual Studio use korle VS ke "Run as administrator" diye khulun.
+
+## Preview themes
+Lock na kore shob status theme-er PNG preview toiri korte:
+
+    dotnet run -- --render-themes
+
+Run elevated (the app manifest requests administrator access); this command does not lock the PC.
+Preview gulo `%AppData%\DeskLock\previews\` e save hobe. Lock screen image `%AppData%\DeskLock\lock.png` e save hoy.
+Windows Spotlight off kore **Settings > Personalization > Lock screen > Picture** select korun,
+nahole Windows app-er image ignore korte pare.
 
 ## Ekta .exe banano (share korar jonno)
 
@@ -45,8 +55,8 @@ Use the tray menu's **Start with Windows** option to disable or re-enable automa
 3. Login e auto chalu hobe; tray menu theke **Start with Windows** untick kore eta bondho korte parben.
 
 ## Setting
-`AppSettings.cs` e: default status, status/rong/default somoy, caption (`AWAY`), jaruri jogajog line,
-background image. Change korle abar build korte hobe.
+`AppSettings.cs` e default status, status theme color/icon, description, and default duration configure kora jay.
+Change korle abar build korte hobe.
 
 ## Bondho / uninstall
 Tray > Exit. Tray > Start with Windows untick. Folder delete. (Registry value app nije muche dey.)
@@ -57,6 +67,7 @@ Tray > Exit. Tray > Start with Windows untick. Folder delete. (Registry value ap
 - `Views/`       MainWindow (popup)
 - `Services/`    LockScreenImageRenderer, LockScreenRegistry, LockScreenService,
                  HotkeyService, SessionWatcher, StartupService, TrayService
+- `THIRD-PARTY-NOTICES.txt`  Tabler Icons license
 
 ## Share korar age
 - Unsigned .exe te Windows SmartScreen warning dekhate pare.

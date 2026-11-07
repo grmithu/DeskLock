@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
@@ -21,6 +22,23 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        if (Array.Exists(e.Args, arg => string.Equals(arg, "--render-themes", StringComparison.OrdinalIgnoreCase)))
+        {
+            try
+            {
+                var paths = new LockScreenImageRenderer().RenderThemePreviews();
+                Trace.TraceInformation("Generated lock-screen previews:{0}{1}", Environment.NewLine, string.Join(Environment.NewLine, paths));
+                Shutdown();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Could not render previews", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown(1);
+            }
+
+            return;
+        }
 
         // Ek shomoye shudhu ekta instance. Dwitiyo bar chalale ager instance er popup khule dey.
         _mutex = new Mutex(true, "DeskLock.SingleInstance", out var isFirst);

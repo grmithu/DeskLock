@@ -2,7 +2,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using System.Windows.Media;
 using DeskLock.Models;
 using DeskLock.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -21,17 +20,7 @@ public partial class MainViewModel : ObservableObject
         _lockScreen = lockScreen;
 
         Statuses = new ObservableCollection<StatusOption>(
-            AppSettings.Statuses.Select(s => new StatusOption(
-                s.Name,
-                s.R,
-                s.G,
-                s.B,
-                s.Minutes,
-                s.Description,
-                s.IconGlyph,
-                s.BackgroundR,
-                s.BackgroundG,
-                s.BackgroundB)));
+            AppSettings.Statuses.Select(s => new StatusOption(s)));
         TimeOptions = new ObservableCollection<TimeOption>(
             AppSettings.TimeOptions.Select(t => new TimeOption(t.Label, t.Minutes)));
 
@@ -110,12 +99,6 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(ClockPickerInstruction));
         OnPropertyChanged(nameof(ClockDialSelectionDisplay));
         UpdateClockHand();
-    }
-
-    partial void OnCustomMessageChanged(string value)
-    {
-        if (_suppress) return;
-        if (!string.IsNullOrWhiteSpace(value)) SelectedStatus = null;
     }
 
     partial void OnExactTimeChanged(string value)
@@ -260,25 +243,30 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var subText = "";
+        DateTime? returnTime = null;
+        var lockMoment = DateTime.Now;
         var exact = ExactTime.Trim();
         if (exact.Length > 0)
         {
             ExactTimeError = ValidateExactTime(exact);
             if (HasExactTimeError) return;
-            subText = $"Back at {exact}";
+            var parsedTime = DateTime.ParseExact(
+                exact,
+                "h:mm tt",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None);
+            returnTime = lockMoment.Date.Add(parsedTime.TimeOfDay);
         }
         else if (SelectedTime is { Minutes: > 0 } time)
         {
-            var back = DateTime.Now.AddMinutes(time.Minutes);
-            subText = "Back at " + back.ToString("h:mm tt", CultureInfo.InvariantCulture);
+            returnTime = lockMoment.AddMinutes(time.Minutes);
         }
 
-        var accent = custom.Length > 0 || SelectedStatus is null ? Colors.White : SelectedStatus.AccentColor;
+        var theme = SelectedStatus?.Definition ?? Statuses[0].Definition;
 
         try
         {
-            _lockScreen.Apply(new AwayInfo(message, subText, accent));
+            _lockScreen.Apply(new AwayInfo(message, returnTime, theme));
         }
         catch (Exception ex)
         {

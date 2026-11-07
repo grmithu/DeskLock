@@ -23,6 +23,8 @@ public partial class MainWindow : Window
     /// <summary>App theke bondho korar shomoy true kora hoy; nahole close korle shudhu hide hoy.</summary>
     public bool AllowClose { get; set; }
 
+    public event Action? ActivityOccurred;
+
     public void ShowPopup()
     {
         if (DataContext is MainViewModel vm)
@@ -70,6 +72,8 @@ public partial class MainWindow : Window
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+        NotifyActivity();
+
         var focusedTimeButton = Keyboard.FocusedElement is Button focusedButton &&
                                 TimeOptions is not null &&
                                 TimeOptions.Items.Contains(focusedButton.DataContext)
@@ -220,8 +224,16 @@ public partial class MainWindow : Window
         }
     }
 
-    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e) =>
+    private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        NotifyActivity();
         _enterArmedTimeOption = null;
+    }
+
+    private void NotifyActivity()
+    {
+        try { ActivityOccurred?.Invoke(); } catch { }
+    }
 
     private void ExecuteLockCommand()
     {

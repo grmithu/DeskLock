@@ -166,11 +166,22 @@ dotnet run --project .\DeskLock.csproj -- --render-themes
 
 Run this command elevated, as the application manifest still requests administrator privileges. The images are written to `%APPDATA%\DeskLock\previews\`.
 
+## Runtime memory diagnostics
+
+Diagnostics are disabled by default. To opt in, start DeskLock with:
+
+```powershell
+dotnet run --project .\DeskLock.csproj -- --memory-diagnostics --memory-interval-seconds 5
+```
+
+The interval is optional and accepts 1–3600 seconds; it defaults to 5 seconds. Each run writes a uniquely named CSV and state summary under `%APPDATA%\DeskLock\Diagnostics\`. Samples include process Working Set, managed heap size, GC collection counts and interval deltas, CPU percentage, and whether DeskLock received input during the preceding interval.
+
 ## Data and configuration
 
 - `AppSettings.cs` contains the built-in status names, descriptions, themes, default durations, and default selected status. Changing these source values requires rebuilding the app.
 - The active lock-screen image is written to `%APPDATA%\DeskLock\lock.png`.
 - Theme previews are written to `%APPDATA%\DeskLock\previews\`.
+- Opt-in runtime diagnostic reports are written to `%APPDATA%\DeskLock\Diagnostics\`.
 - Lock-screen rendering and registry failures are recorded in `%APPDATA%\DeskLock\errors.log`.
 - DeskLock clears its configured lock-screen registry values on session unlock or logon and when the running app exits.
 - The outline icon geometries are derived from Tabler Icons; see `THIRD-PARTY-NOTICES.txt` for the license.

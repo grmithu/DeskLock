@@ -12,18 +12,32 @@ public sealed class TrayService : IDisposable
 
     public event Action? OpenRequested;
     public event Action? ExitRequested;
+    public event Action? ActivityOccurred;
 
     public TrayService()
     {
         var menu = new WinForms.ContextMenuStrip();
-        menu.Items.Add("Set status...", null, (_, _) => OpenRequested?.Invoke());
+        menu.Opening += (_, _) => NotifyActivity();
+        menu.Items.Add("Set status...", null, (_, _) =>
+        {
+            NotifyActivity();
+            OpenRequested?.Invoke();
+        });
 
         _startupItem = new WinForms.ToolStripMenuItem("Start with Windows") { Checked = StartupService.IsEnabled() };
-        _startupItem.Click += (_, _) => ToggleStartup();
+        _startupItem.Click += (_, _) =>
+        {
+            NotifyActivity();
+            ToggleStartup();
+        };
         menu.Items.Add(_startupItem);
 
         menu.Items.Add(new WinForms.ToolStripSeparator());
-        menu.Items.Add("Exit", null, (_, _) => ExitRequested?.Invoke());
+        menu.Items.Add("Exit", null, (_, _) =>
+        {
+            NotifyActivity();
+            ExitRequested?.Invoke();
+        });
 
         _icon = new WinForms.NotifyIcon
         {
@@ -34,7 +48,11 @@ public sealed class TrayService : IDisposable
         };
         _icon.MouseClick += (_, e) =>
         {
-            if (e.Button == WinForms.MouseButtons.Left) OpenRequested?.Invoke();
+            if (e.Button == WinForms.MouseButtons.Left)
+            {
+                NotifyActivity();
+                OpenRequested?.Invoke();
+            }
         };
     }
 
@@ -48,6 +66,11 @@ public sealed class TrayService : IDisposable
             : StartupService.Enable(out error);
         _startupItem.Checked = StartupService.IsEnabled();
         if (!ok) Notify("Desk Lock", $"Could not change the startup setting. {error}");
+    }
+
+    private void NotifyActivity()
+    {
+        try { ActivityOccurred?.Invoke(); } catch { }
     }
 
     private static Drawing.Icon CreateIcon()

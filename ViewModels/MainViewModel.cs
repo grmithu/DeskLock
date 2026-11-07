@@ -33,26 +33,11 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private StatusOption? selectedStatus;
     [ObservableProperty] private TimeOption? selectedTime;
     [ObservableProperty] private string customMessage = "";
-    [ObservableProperty] private string exactTime = "";
-    [ObservableProperty] private string? exactTimeHour;
-    [ObservableProperty] private string? exactTimeMinute;
-    [ObservableProperty] private string? exactTimePeriod;
-    [ObservableProperty] private bool isExactTimePickerOpen;
-    [ObservableProperty] private bool isSelectingMinutes;
-    [ObservableProperty] private double dialHandX = 82;
-    [ObservableProperty] private double dialHandY = 22;
-    [ObservableProperty] private string exactTimeError = "";
     [ObservableProperty] private string errorText = "";
 
-    public bool HasExactTimeError => !string.IsNullOrEmpty(ExactTimeError);
-    public string ExactTimeDisplay => string.IsNullOrEmpty(ExactTime) ? "Select time..." : ExactTime;
-    public string ClockHourDisplay => ExactTimeHour ?? "12";
-    public string ClockMinuteDisplay => ExactTimeMinute ?? "00";
-    public string ClockPeriodDisplay => ExactTimePeriod ?? "AM";
-    public string ClockPickerInstruction => IsSelectingMinutes ? "Select minute" : "Select hour";
-    public string ClockDialSelectionDisplay => IsSelectingMinutes
-        ? ExactTimeMinute ?? "00"
-        : ExactTimeHour ?? "12";
+    public string ReturnTimePreview => SelectedTime is { Minutes: > 0 } time
+        ? $"Back at {DateTime.Now.AddMinutes(time.Minutes).ToString("h:mm tt", CultureInfo.InvariantCulture)}"
+        : "No ETA";
 
     /// <summary>Popup bondho korar jonno window ke bola.</summary>
     public event Action? CloseRequested;
@@ -71,79 +56,33 @@ public partial class MainViewModel : ObservableObject
     {
         if (oldValue is not null) oldValue.IsSelected = false;
         if (newValue is not null) newValue.IsSelected = true;
+        OnPropertyChanged(nameof(ReturnTimePreview));
     }
 
     partial void OnCustomMessageChanged(string value)
     {
-        if (!_suppress && !string.IsNullOrEmpty(value))
+        if (_suppress || string.IsNullOrWhiteSpace(value))
         {
-            SelectedStatus = null;
+            return;
         }
-    }
 
-    partial void OnExactTimeErrorChanged(string value) =>
-        OnPropertyChanged(nameof(HasExactTimeError));
-
-    partial void OnExactTimeHourChanged(string? value)
-    {
-        OnPropertyChanged(nameof(ClockHourDisplay));
-        OnPropertyChanged(nameof(ClockDialSelectionDisplay));
-        UpdateClockHand();
-        UpdateExactTimeFromPicker();
-    }
-
-    partial void OnExactTimeMinuteChanged(string? value)
-    {
-        OnPropertyChanged(nameof(ClockMinuteDisplay));
-        OnPropertyChanged(nameof(ClockDialSelectionDisplay));
-        UpdateClockHand();
-        UpdateExactTimeFromPicker();
-    }
-
-    partial void OnExactTimePeriodChanged(string? value)
-    {
-        OnPropertyChanged(nameof(ClockPeriodDisplay));
-        UpdateExactTimeFromPicker();
-    }
-
-    partial void OnIsSelectingMinutesChanged(bool value)
-    {
-        OnPropertyChanged(nameof(ClockPickerInstruction));
-        OnPropertyChanged(nameof(ClockDialSelectionDisplay));
-        UpdateClockHand();
-    }
-
-    partial void OnExactTimeChanged(string value)
-    {
-        OnPropertyChanged(nameof(ExactTimeDisplay));
-        if (_suppress) return;
-        if (!string.IsNullOrWhiteSpace(value))
+        ErrorText = "";
+        if (SelectedStatus is null)
         {
-            SelectedTime = null;
-            _timeTouched = true;
-            ExactTimeError = ValidateExactTime(value);
+            return;
         }
-        else
-        {
-            ExactTimeError = "";
-        }
+
+        SelectedStatus = null;
+        SelectedTime = TimeOptions.FirstOrDefault(t => t.Minutes == AppSettings.CustomMessageTheme.DefaultMinutes)
+            ?? TimeOptions[0];
+        _timeTouched = false;
     }
 
     /// <summary>Popup khulle ager state muche default status select kore.</summary>
     public void Reset()
     {
         _timeTouched = false;
-        Suppressed(() =>
-        {
-            CustomMessage = "";
-            ExactTime = "";
-            ExactTimeHour = null;
-            ExactTimeMinute = null;
-            ExactTimePeriod = null;
-            ExactTimeError = "";
-        });
-        IsExactTimePickerOpen = false;
-        IsSelectingMinutes = false;
+        Suppressed(() => CustomMessage = "");
         ErrorText = "";
 
         var def = Statuses.FirstOrDefault(s => s.Name == AppSettings.DefaultStatus);
@@ -156,6 +95,8 @@ public partial class MainViewModel : ObservableObject
             SelectedStatus = null;
             SelectedTime = TimeOptions[0];
         }
+
+        OnPropertyChanged(nameof(ReturnTimePreview));
     }
 
     [RelayCommand]
@@ -165,7 +106,7 @@ public partial class MainViewModel : ObservableObject
         SelectedStatus = option;
 
         // Nijer hate time na bachle status er default time auto select hobe
-        if (!_timeTouched && string.IsNullOrWhiteSpace(ExactTime))
+        if (!_timeTouched)
         {
             SelectedTime = TimeOptions.FirstOrDefault(t => t.Minutes == option.DefaultMinutes) ?? TimeOptions[0];
         }
@@ -178,66 +119,7 @@ public partial class MainViewModel : ObservableObject
         if (option is null) return;
         SelectedTime = option;
         _timeTouched = true;
-        Suppressed(() =>
-        {
-            ExactTime = "";
-            ExactTimeHour = null;
-            ExactTimeMinute = null;
-            ExactTimePeriod = null;
-        });
-        IsExactTimePickerOpen = false;
-        IsSelectingMinutes = false;
-        ExactTimeError = "";
-    }
-
-    [RelayCommand]
-    private void ToggleExactTimePicker()
-    {
-        IsExactTimePickerOpen = !IsExactTimePickerOpen;
-        if (IsExactTimePickerOpen)
-        {
-            IsSelectingMinutes = ExactTimeHour is not null;
-            ExactTimePeriod ??= "AM";
-        }
-    }
-
-    [RelayCommand]
-    private void CloseExactTimePicker() => IsExactTimePickerOpen = false;
-
-    [RelayCommand]
-    private void SelectHourPhase() => IsSelectingMinutes = false;
-
-    [RelayCommand]
-    private void SelectMinutePhase() => IsSelectingMinutes = true;
-
-    [RelayCommand]
-    private void SelectExactTimePeriod(string? period)
-    {
-        if (period is "AM" or "PM")
-        {
-            ExactTimePeriod = period;
-        }
-    }
-
-    public void SelectClockDialPoint(double x, double y)
-    {
-        var dx = x - 82;
-        var dy = 82 - y;
-        var angle = Math.Atan2(dx, dy);
-        if (angle < 0) angle += 2 * Math.PI;
-
-        if (IsSelectingMinutes)
-        {
-            ExactTimeMinute = ((int)Math.Round(angle / (2 * Math.PI) * 60) % 60)
-                .ToString("00", CultureInfo.InvariantCulture);
-        }
-        else
-        {
-            var hour = (int)Math.Round(angle / (2 * Math.PI) * 12) % 12;
-            ExactTimeHour = (hour == 0 ? 12 : hour).ToString(CultureInfo.InvariantCulture);
-            ExactTimePeriod ??= "AM";
-            IsSelectingMinutes = true;
-        }
+        ErrorText = "";
     }
 
     [RelayCommand]
@@ -255,22 +137,9 @@ public partial class MainViewModel : ObservableObject
         }
 
         DateTime? returnTime = null;
-        var lockMoment = DateTime.Now;
-        var exact = ExactTime.Trim();
-        if (exact.Length > 0)
+        if (SelectedTime is { Minutes: > 0 } time)
         {
-            ExactTimeError = ValidateExactTime(exact);
-            if (HasExactTimeError) return;
-            var parsedTime = DateTime.ParseExact(
-                exact,
-                "h:mm tt",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None);
-            returnTime = lockMoment.Date.Add(parsedTime.TimeOfDay);
-        }
-        else if (SelectedTime is { Minutes: > 0 } time)
-        {
-            returnTime = lockMoment.AddMinutes(time.Minutes);
+            returnTime = DateTime.Now.AddMinutes(time.Minutes);
         }
 
         var theme = SelectedStatus?.Definition ?? AppSettings.CustomMessageTheme;
@@ -302,56 +171,5 @@ public partial class MainViewModel : ObservableObject
         _suppress = true;
         try { action(); }
         finally { _suppress = false; }
-    }
-
-    private void UpdateExactTimeFromPicker()
-    {
-        if (_suppress
-            || ExactTimeHour is null
-            || ExactTimeMinute is null
-            || ExactTimePeriod is null)
-        {
-            return;
-        }
-
-        ExactTime = $"{ExactTimeHour}:{ExactTimeMinute} {ExactTimePeriod}";
-    }
-
-    private void UpdateClockHand()
-    {
-        var angle = IsSelectingMinutes
-            ? (ExactTimeMinute is not null
-                ? int.Parse(ExactTimeMinute, CultureInfo.InvariantCulture) * 6
-                : 0)
-            : (ExactTimeHour is not null
-                ? int.Parse(ExactTimeHour, CultureInfo.InvariantCulture) % 12 * 30
-                : 0);
-        var radians = angle * Math.PI / 180;
-        DialHandX = 82 + 60 * Math.Sin(radians);
-        DialHandY = 82 - 60 * Math.Cos(radians);
-    }
-
-    private static string ValidateExactTime(string value)
-    {
-        var exact = value.Trim();
-        if (!DateTime.TryParseExact(
-                exact,
-                "h:mm tt",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out var parsedTime)
-            || !string.Equals(
-                exact,
-                parsedTime.ToString("h:mm tt", CultureInfo.InvariantCulture),
-                StringComparison.Ordinal))
-        {
-            return "Enter the time in the 2:00 PM format.";
-        }
-
-        var now = DateTime.Now;
-        var target = now.Date.Add(parsedTime.TimeOfDay);
-        return target <= now
-            ? "That time has already passed. Enter a future time today."
-            : "";
     }
 }

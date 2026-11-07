@@ -91,7 +91,9 @@ public partial class MainWindow : Window
 
             if (focusedTimeButton is not null)
             {
-                if (ReferenceEquals(_enterArmedTimeOption, focusedTimeButton))
+                if (ReferenceEquals(_enterArmedTimeOption, focusedTimeButton) ||
+                    DataContext is MainViewModel timeViewModel &&
+                    ReferenceEquals(focusedTimeButton.DataContext, timeViewModel.SelectedTime))
                 {
                     ExecuteLockCommand();
                 }
@@ -259,7 +261,7 @@ public partial class MainWindow : Window
                  TimeOptions.Items.Contains(focusedButton.DataContext))
         {
             targetButtons = FindGridButtons(TimeOptions);
-            columns = 5;
+            columns = 6;
         }
         else if (focusedElement is null || ReferenceEquals(focusedElement, this))
         {
@@ -313,15 +315,5 @@ public partial class MainWindow : Window
         return buttons
             .Where(button => button.Parent is not null)
             .ToList();
-    }
-
-    private void ExactTimeDial_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (sender is Canvas dial && DataContext is MainViewModel viewModel)
-        {
-            var point = e.GetPosition(dial);
-            viewModel.SelectClockDialPoint(point.X, point.Y);
-            e.Handled = true;
-        }
     }
 }

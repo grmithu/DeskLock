@@ -34,6 +34,7 @@ internal static class AppSettings
         ("10 min",  10),
         ("15 min",  15),
         ("30 min",  30),
+        ("45 min",  45),
         ("1 hour",  60),
     };
 }
